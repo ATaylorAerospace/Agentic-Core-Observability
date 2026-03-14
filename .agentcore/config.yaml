@@ -1,0 +1,98 @@
+# Agentic Core Observability - AgentCore Configuration
+# Author: A Taylor
+# Runtime, Memory, and Gateway settings for AgentCore deployment
+
+runtime:
+  name: "agentic-core-observability"
+  version: "1.0.0"
+  entry_point: "src.app:main"
+  python_version: "3.12"
+  timeout_seconds: 900
+  max_concurrent_sessions: 50
+
+  environment:
+    AWS_REGION: "us-east-1"
+    LOG_LEVEL: "INFO"
+    ENABLE_TRACING: "true"
+    OBSERVABILITY_MODE: "full"
+
+  resources:
+    memory_mb: 2048
+    ephemeral_storage_mb: 1024
+
+memory:
+  semantic:
+    enabled: true
+    namespace: "agentic-observability"
+    embedding_model: "amazon.titan-embed-text-v2:0"
+    vector_store: "default"
+    retention_days: 90
+    similarity_threshold: 0.75
+    max_results: 10
+    metadata_fields:
+      - "user_id"
+      - "report_type"
+      - "preference_category"
+      - "session_id"
+
+tools:
+  code_interpreter:
+    enabled: true
+    sandbox: true
+    allowed_languages:
+      - "python"
+    max_execution_time_seconds: 120
+    max_output_size_kb: 512
+
+  browser:
+    enabled: true
+    provider: "nova_act"
+    headless: true
+    max_page_load_seconds: 30
+    allowed_domains:
+      - "*.amazonaws.com"
+      - "*.arxiv.org"
+      - "*.github.com"
+      - "*.wikipedia.org"
+
+gateway:
+  enabled: true
+  agents:
+    - name: "bedrock-research-agent"
+      type: "bedrock_agent"
+      agent_id: "${BEDROCK_RESEARCH_AGENT_ID}"
+      agent_alias_id: "${BEDROCK_RESEARCH_AGENT_ALIAS_ID}"
+      description: "Managed Bedrock Agent for deep research tasks and document synthesis"
+      protocol: "a2a"
+      timeout_seconds: 300
+
+    - name: "bedrock-analyst-agent"
+      type: "bedrock_agent"
+      agent_id: "${BEDROCK_ANALYST_AGENT_ID}"
+      agent_alias_id: "${BEDROCK_ANALYST_AGENT_ALIAS_ID}"
+      description: "Managed Bedrock Agent for data analysis and trend identification"
+      protocol: "a2a"
+      timeout_seconds: 300
+
+observability:
+  tracing:
+    enabled: true
+    provider: "aws_xray"
+    sample_rate: 1.0
+
+  metrics:
+    enabled: true
+    namespace: "AgenticCoreObservability"
+    publish_interval_seconds: 60
+
+  logging:
+    level: "INFO"
+    structured: true
+    include_trace_id: true
+
+  hallucination_detection:
+    enabled: true
+    confidence_threshold: 0.85
+    max_retry_loops: 3
+    grounding_check: true
+    source_attribution: true
