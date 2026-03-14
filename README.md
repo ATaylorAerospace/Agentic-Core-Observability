@@ -20,7 +20,7 @@ The core idea is simple. Wire up a Strands SDK supervisor that routes tasks to s
 
 - Python 3.12+
 - AWS CLI configured with valid credentials
-- Access to Amazon Bedrock models in your target region
+- Access to Amazon Bedrock models
 
 ### Installation
 
