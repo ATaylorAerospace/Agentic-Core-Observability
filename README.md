@@ -8,7 +8,7 @@
 
 ---
 
-I built this because I got tired of watching agentic systems hallucinate in circles and nobody being able to tell *why*. Most multi-agent setups look great in a demo, then fall apart the moment you need actual reliability. This project is my answer to that problem: a fully observable, multi-agent research and automation hub where every routing decision, every tool call, and every memory lookup is traced, measured, and guarded against hallucination drift.
+I built this  fully observable, multi-agent research and automation hub where every routing decision, every tool call, and every memory lookup is traced, measured, and guarded against hallucination drift.
 
 The core idea is simple. Wire up a Strands SDK supervisor that routes tasks to specialized agents, deploy the whole thing on AgentCore Runtime with semantic memory baked in, and connect managed Bedrock Agents through the Gateway for true Agent-to-Agent orchestration. Then wrap every layer in observability so you can actually see what your agents are doing and catch them before they spin out.
 
@@ -215,8 +215,6 @@ Agentic-Core-Observability/
 ## 👨‍💻 Author
 
 **A Taylor**
-
-Built at the intersection of aerospace engineering and applied AI. This project reflects a hands-on approach to solving the real operational challenges of multi-agent systems: observability, reliability, and hallucination control.
 
 ---
 
