@@ -1,0 +1,21 @@
+# Agentic Core Observability - Python Dependencies
+# Copyright (c) 2026 A Taylor. All rights reserved.
+
+# Strands SDK - Agentic routing and orchestration
+strands-agents>=0.1.0
+strands-agents-tools>=0.1.0
+
+# AWS SDK
+boto3>=1.35.0
+botocore>=1.35.0
+
+# AWS CDK (for infrastructure deployment)
+aws-cdk-lib>=2.170.0
+constructs>=10.0.0
+
+# Observability and tracing
+aws-xray-sdk>=2.14.0
+
+# Utilities
+pydantic>=2.0.0
+python-dotenv>=1.0.0
