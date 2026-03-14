@@ -8,7 +8,7 @@
 
 ---
 
-I built this  fully observable, multi-agent research and automation hub where every routing decision, every tool call, and every memory lookup is traced, measured, and guarded against hallucination drift.
+This is a  multi-agent research and automation hub where every routing decision, every tool call, and every memory lookup is traced, measured, and guarded against hallucination drift.
 
 The core idea is simple. Wire up a Strands SDK supervisor that routes tasks to specialized agents, deploy the whole thing on AgentCore Runtime with semantic memory baked in, and connect managed Bedrock Agents through the Gateway for true Agent-to-Agent orchestration. Then wrap every layer in observability so you can actually see what your agents are doing and catch them before they spin out.
 
