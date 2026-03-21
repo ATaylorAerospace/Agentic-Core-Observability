@@ -300,5 +300,4 @@ Have questions, ideas, or want to collaborate? Reach out directly:
   </a>
 </p>
 ---
-
-**A Taylor** · [Contact](https://ataylor.getform.com/5w8wz)
+[Contact](https://ataylor.getform.com/5w8wz)
