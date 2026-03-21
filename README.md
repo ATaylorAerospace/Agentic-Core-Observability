@@ -294,12 +294,11 @@ Copyright (c) 2026 A Taylor. All rights reserved.
 
 Have questions, ideas, or want to collaborate? Reach out directly:
 
-<p align="center">
+**A Taylor** ·<p align="left">
   <a href="https://ataylor.getform.com/5w8wz">
     <img src="https://img.shields.io/badge/Contact_A_Taylor-Get_In_Touch-brightgreen?logo=mail.ru&logoColor=white" alt="Contact A Taylor" />
   </a>
 </p>
-
 ---
 
 **A Taylor** · [Contact](https://ataylor.getform.com/5w8wz)
