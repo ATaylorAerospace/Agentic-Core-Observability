@@ -1,17 +1,96 @@
 # 🔭 Agentic Core Observability
 
-**Advanced AI architecture demonstrating enterprise orchestration using Bedrock Agents, Strands SDK, and AgentCore Runtime.**
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock-FF9900?logo=amazonaws&logoColor=white)](https://aws.amazon.com/bedrock/)
+[![Strands SDK](https://img.shields.io/badge/Strands-SDK-blueviolet)](https://github.com/strands-agents/sdk-python)
+[![AgentCore](https://img.shields.io/badge/AgentCore-Runtime-orange?logo=amazonaws&logoColor=white)](https://aws.amazon.com/agentcore/)
 [![Contact A Taylor](https://img.shields.io/badge/Contact-A%20Taylor-brightgreen?logo=mail.ru&logoColor=white)](https://ataylor.getform.com/5w8wz)
+
+> **Advanced AI architecture demonstrating enterprise orchestration using Bedrock Agents, Strands SDK, and AgentCore Runtime.**
+
+*Multi-agent routing · Observability tracing · Hallucination detection · Semantic memory · Agent-to-Agent orchestration*
+
+**Author: A Taylor**
 
 ---
 
-This is a  multi-agent research and automation hub where every routing decision, every tool call, and every memory lookup is traced, measured, and guarded against hallucination drift.
+## 💡 The Problem
 
-The core idea is simple. Wire up a Strands SDK supervisor that routes tasks to specialized agents, deploy the whole thing on AgentCore Runtime with semantic memory baked in, and connect managed Bedrock Agents through the Gateway for true Agent-to-Agent orchestration. Then wrap every layer in observability so you can actually see what your agents are doing and catch them before they spin out.
+Multi-agent systems are powerful — but opaque. When a supervisor routes tasks to specialist agents, you have no visibility into why it chose a particular path, whether it is stuck in a loop, or if confidence is degrading. Silent hallucination spirals burn tokens and produce garbage. Without end-to-end tracing, debugging agent workflows is guesswork.
+
+---
+
+## ✨ The Solution
+
+Wire up a Strands SDK supervisor that routes tasks to specialized agents, deploy the whole thing on AgentCore Runtime with semantic memory baked in, and connect managed Bedrock Agents through the Gateway for true Agent-to-Agent orchestration. Then wrap every layer in observability so you can actually see what your agents are doing and catch them before they spin out.
+
+| Layer | What It Does | Status |
+|-------|-------------|--------|
+| 🧠 **Supervisor Agent** | Intent classification and routing (RESEARCH / ANALYSIS / GENERAL) | ✅ Live |
+| 🔍 **Researcher Agent** | Source retrieval via Nova Act browser + Bedrock A2A Gateway | ✅ Live |
+| 📊 **Analyst Agent** | Data interpretation in sandboxed Code Interpreter | ✅ Live |
+| 💾 **Semantic Memory** | Vector similarity recall of user preferences across sessions | ✅ Live |
+| 🛡️ **Hallucination Guard** | Loop detection and circuit-breaking on repetitive patterns | ✅ Live |
+| 📈 **Observability Stack** | X-Ray tracing, structured logging, confidence scoring | ✅ Live |
+
+---
+
+## 🏗️ Architecture
+
+```
+                     +---------------------+
+                     |   User / Client     |
+                     +----------+----------+
+                                |
+                                v
+                     +----------+----------+
+                     |  Supervisor Agent    |  <-- Strands SDK Orchestrator
+                     |  (Intent Router)     |
+                     +----+----------+-----+
+                          |          |
+               +----------+    +-----+--------+
+               |               |              |
+          +----v----+   +-----v-----+  +------v------+
+          |Researcher|  |  Analyst   |  |  Semantic   |
+          |  Agent   |  |   Agent    |  |  Memory     |
+          +----+-----+  +-----+-----+  +-------------+
+               |               |
+    +----------+-----+ +------+--------+
+    | Bedrock Agent  | | Code          |
+    | (A2A Gateway)  | | Interpreter   |
+    +----------------+ +---------------+
+```
+
+**Supervisor Agent** receives every request, classifies intent (RESEARCH / ANALYSIS / GENERAL), and routes to the right specialist. It maintains a full execution trace and runs hallucination-loop detection on every cycle.
+
+**Researcher Agent** gathers information from authoritative sources using the AgentCore Browser tool (Nova Act) and delegates deep synthesis tasks to a managed Bedrock Agent via the A2A Gateway.
+
+**Analyst Agent** interprets data and identifies trends using the AgentCore Code Interpreter in a sandboxed Python environment.
+
+**Semantic Memory** stores and recalls user preferences (report format, preferred sources, analysis depth) so the system gets smarter with each session.
+
+For the full technical breakdown, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+---
+
+## 🎯 Use Cases
+
+### 1. Enterprise Research Automation
+
+Deploy the Researcher Agent to continuously monitor and synthesize information from multiple sources — regulatory filings, competitor announcements, market reports — with full provenance tracking and confidence scoring on every finding.
+
+### 2. Real-Time Operational Analytics
+
+Route live telemetry and business metrics through the Analyst Agent for automated trend detection, anomaly flagging, and comparison analysis. The sandboxed Code Interpreter executes custom Python analyses on demand without infrastructure risk.
+
+### 3. AI-Augmented Customer Support
+
+Use the Supervisor's intent classification to triage incoming requests, retrieve relevant knowledge via semantic memory, and generate grounded responses. Hallucination loop detection ensures the system never spirals into fabricated answers.
+
+### 4. Multi-Agent DevOps Orchestration
+
+Coordinate incident response across specialized agents — one retrieves logs and traces via the Browser tool, another analyzes error patterns in the Code Interpreter, while semantic memory recalls past incident resolutions and runbooks for faster MTTR.
 
 ---
 
@@ -65,44 +144,6 @@ python -m tests.test_connection
 ```
 
 This runs 5 checks: AWS credentials, Bedrock model access, Strands SDK import, Supervisor initialization, and tool registration. Green across the board means you are good to go.
-
----
-
-## 🧠 Architecture Overview
-
-```
-                     +---------------------+
-                     |   User / Client     |
-                     +----------+----------+
-                                |
-                                v
-                     +----------+----------+
-                     |  Supervisor Agent    |  <-- Strands SDK Orchestrator
-                     |  (Intent Router)     |
-                     +----+----------+-----+
-                          |          |
-               +----------+    +-----+--------+
-               |               |              |
-          +----v----+   +-----v-----+  +------v------+
-          |Researcher|  |  Analyst   |  |  Semantic   |
-          |  Agent   |  |   Agent    |  |  Memory     |
-          +----+-----+  +-----+-----+  +-------------+
-               |               |
-    +----------+-----+ +------+--------+
-    | Bedrock Agent  | | Code          |
-    | (A2A Gateway)  | | Interpreter   |
-    +----------------+ +---------------+
-```
-
-**Supervisor Agent** receives every request, classifies intent (RESEARCH / ANALYSIS / GENERAL), and routes to the right specialist. It maintains a full execution trace and runs hallucination-loop detection on every cycle.
-
-**Researcher Agent** gathers information from authoritative sources using the AgentCore Browser tool (Nova Act) and delegates deep synthesis tasks to a managed Bedrock Agent via the A2A Gateway.
-
-**Analyst Agent** interprets data and identifies trends using the AgentCore Code Interpreter in a sandboxed Python environment.
-
-**Semantic Memory** stores and recalls user preferences (report format, preferred sources, analysis depth) so the system gets smarter with each session.
-
-For the full technical breakdown, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
@@ -177,7 +218,26 @@ JSON-formatted logs with trace IDs for correlation. Query patterns across sessio
 
 ---
 
-## 📁 Project Structure
+## 🧩 Components
+
+### 🧠 Supervisor Agent (`src/agents/supervisor.py`)
+Receives every request, classifies intent, and routes to specialists. Maintains a full execution trace and runs hallucination-loop detection on every cycle.
+
+### 🛠️ Custom Tools (`src/agents/tools.py`)
+`@tool`-decorated functions for research, analysis, and memory operations with built-in confidence scoring.
+
+### 💾 AgentCore Config (`.agentcore/config.yaml`)
+Runtime, memory, and gateway configuration — semantic memory, X-Ray tracing, and Bedrock Agent A2A routing.
+
+### 🏗️ CDK Infrastructure (`cdk/agent_stack.py`)
+Full AWS stack — Bedrock Agent, IAM roles, S3 buckets, and CloudWatch log groups deployed via CDK.
+
+### 🧪 Connection Tests (`tests/test_connection.py`)
+5-point environment verification: AWS credentials, Bedrock access, SDK import, Supervisor init, and tool registration.
+
+---
+
+## 📁 Repository Structure
 
 ```
 Agentic-Core-Observability/
@@ -213,7 +273,26 @@ Agentic-Core-Observability/
 
 ---
 
-## 👨‍💻 Author
+## 🧪 Testing
+
+```bash
+# Verify environment and connections
+python -m tests.test_connection
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+Copyright (c) 2026 A Taylor. All rights reserved.
+
+---
+
+## 📬 Contact
+
+Have questions, ideas, or want to collaborate? Reach out directly:
 
 **A Taylor** ·<p align="left">
   <a href="https://ataylor.getform.com/5w8wz">
@@ -222,8 +301,4 @@ Agentic-Core-Observability/
 </p>
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
-Copyright (c) 2026 A Taylor. All rights reserved.
+**A Taylor** · [Contact](https://ataylor.getform.com/5w8wz)
