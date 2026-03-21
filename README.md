@@ -9,7 +9,7 @@
 
 > **Advanced AI architecture demonstrating enterprise orchestration using Bedrock Agents, Strands SDK, and AgentCore Runtime.**
 
-*Multi-agent routing · Observability tracing · Hallucination detection · Semantic memory · Agent-to-Agent orchestration*
+*Multi agent routing · Observability tracing · Hallucination detection · Semantic memory · Agent-to-Agent orchestration*
 
 **Author: A Taylor**
 
