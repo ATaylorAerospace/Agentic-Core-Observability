@@ -4,7 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
-[![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock-orange.svg)](https://aws.amazon.com/bedrock/)
+[![AWS Bedrock](https://img.shields.io/badge/AWS-Bedrock-FF9900?logo=amazonaws&logoColor=white)](https://aws.amazon.com/bedrock/)
+[![Contact A Taylor](https://img.shields.io/badge/Contact-A%20Taylor-brightgreen?style=for-the-badge&logo=mail.ru&logoColor=white)](https://ataylor.getform.com/5w8wz)
 
 ---
 
@@ -214,7 +215,13 @@ Agentic-Core-Observability/
 
 ## 👨‍💻 Author
 
-**A Taylor**
+<p align="center">
+  <a href="https://ataylor.getform.com/5w8wz">
+    <img src="https://img.shields.io/badge/Contact_A_Taylor-Get_In_Touch-brightgreen?style=for-the-badge&logo=mail.ru&logoColor=white" alt="Contact A Taylor" />
+  </a>
+</p>
+
+**A Taylor** · [Contact](https://ataylor.getform.com/5w8wz)
 
 ---
 
