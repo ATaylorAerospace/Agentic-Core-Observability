@@ -1,3 +1,5 @@
+![thermalagent](docs/agenticworkflow.png)
+
 # 🔭 Agentic Core Observability
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
