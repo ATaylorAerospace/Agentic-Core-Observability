@@ -13,8 +13,6 @@
 
 *Multi agent routing · Observability tracing · Hallucination detection · Semantic memory · Agent-to-Agent orchestration*
 
-**Author: A Taylor**
-
 ---
 
 ## 💡 The Problem
