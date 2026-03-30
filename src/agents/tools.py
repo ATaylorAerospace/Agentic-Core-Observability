@@ -64,6 +64,12 @@ def analysis_tool(data: str, analysis_type: str = "summary") -> dict[str, Any]:
 
     valid_types = {"summary", "trend", "comparison", "sentiment"}
     if analysis_type not in valid_types:
+        logger.warning(
+            "Invalid analysis_type '%s' received; falling back to 'summary'. "
+            "Valid types: %s",
+            analysis_type,
+            ", ".join(sorted(valid_types)),
+        )
         analysis_type = "summary"
 
     # In production the AgentCore Code Interpreter executes analytical
