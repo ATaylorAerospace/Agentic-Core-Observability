@@ -109,7 +109,10 @@ Coordinate incident response across specialized agents — one retrieves logs an
 git clone https://github.com/ATaylorAerospace/Agentic-Core-Observability.git
 cd Agentic-Core-Observability
 
-# Install dependencies
+# Install as an editable package (recommended)
+pip install -e .
+
+# Or install dependencies directly
 pip install -r src/requirements.txt
 
 # Verify your environment
@@ -160,7 +163,7 @@ This repository demonstrates three distinct integration patterns running in a si
 ### Tool Registry
 
 - `research_tool` - Structured source retrieval with confidence scoring
-- `analysis_tool` - Multi-mode data analysis (summary, trend, comparison, sentiment)
+- `analysis_tool` - Multi-mode data analysis (summary, trend, comparison, sentiment) with input validation logging
 - `memory_store_tool` - Persist content to AgentCore semantic memory
 - `memory_recall_tool` - Vector similarity search over stored memory
 - `http_request` - Direct HTTP calls via Strands tools
@@ -194,7 +197,7 @@ Every tool response includes a `confidence` field. Responses below the threshold
 
 ### Trace Inspection
 
-Pull the full execution trace at any time during an interactive session:
+Pull the full execution trace at any time during an interactive session. Every trace entry includes a UTC timestamp for latency analysis and event correlation:
 
 ```
 You > trace
@@ -203,7 +206,8 @@ You > trace
     "action": "supervisor_response",
     "input_preview": "Research the latest trends in...",
     "session_id": "a1b2c3d4-...",
-    "user_id": "default"
+    "user_id": "default",
+    "timestamp": "2026-03-28T14:32:01.456789+00:00"
   }
 ]
 ```
@@ -214,26 +218,29 @@ Distributed tracing across all agent invocations, memory lookups, and Gateway ca
 
 ### Structured Logging
 
-JSON-formatted logs with trace IDs for correlation. Query patterns across sessions using CloudWatch Log Insights.
+JSON-formatted logs with trace IDs for correlation. Query patterns across sessions using CloudWatch Log Insights. Invalid tool inputs (such as unrecognized `analysis_type` values) are logged at WARNING level for easy debugging.
 
 ---
 
 ## 🧩 Components
 
 ### 🧠 Supervisor Agent (`src/agents/supervisor.py`)
-Receives every request, classifies intent, and routes to specialists. Maintains a full execution trace and runs hallucination-loop detection on every cycle.
+Receives every request, classifies intent, and routes to specialists. Maintains a full execution trace with UTC timestamps and runs hallucination-loop detection on every cycle. Exposes `delegate_research()` and `delegate_analysis()` methods for explicit sub-agent delegation with full trace recording.
 
 ### 🛠️ Custom Tools (`src/agents/tools.py`)
-`@tool`-decorated functions for research, analysis, and memory operations with built-in confidence scoring.
+`@tool`-decorated functions for research, analysis, and memory operations with built-in confidence scoring. Invalid inputs are caught and logged at WARNING level before falling back to safe defaults.
 
 ### 💾 AgentCore Config (`.agentcore/config.yaml`)
 Runtime, memory, and gateway configuration — semantic memory, X-Ray tracing, and Bedrock Agent A2A routing.
 
 ### 🏗️ CDK Infrastructure (`cdk/agent_stack.py`)
-Full AWS stack — Bedrock Agent, IAM roles, S3 buckets, and CloudWatch log groups deployed via CDK.
+Full AWS stack — Bedrock Agent, IAM roles, S3 buckets, and CloudWatch log groups deployed via CDK. The `cdk/cdk.json` file provides CDK CLI compatibility for `cdk synth`, `cdk diff`, and `cdk deploy`.
 
 ### 🧪 Connection Tests (`tests/test_connection.py`)
 5-point environment verification: AWS credentials, Bedrock access, SDK import, Supervisor init, and tool registration.
+
+### 🧪 Hallucination Loop Tests (`tests/test_hallucination_loop.py`)
+Dedicated unit tests for the hallucination-loop detection logic — covers empty traces, threshold boundaries, varied vs identical actions, custom thresholds, and edge cases.
 
 ---
 
@@ -252,11 +259,18 @@ Agentic-Core-Observability/
 │   └── requirements.txt         # Python dependencies
 ├── cdk/
 │   ├── app.py                   # CDK application entry
-│   └── agent_stack.py           # Infrastructure stack (Bedrock, IAM, S3, Logs)
+│   ├── agent_stack.py           # Infrastructure stack (Bedrock, IAM, S3, Logs)
+│   └── cdk.json                 # CDK CLI configuration
 ├── docs/
 │   └── ARCHITECTURE.md          # Detailed architecture documentation
 ├── tests/
-│   └── test_connection.py       # Environment and connection verification
+│   ├── __init__.py              # Test package init
+│   ├── test_connection.py       # Environment and connection verification
+│   └── test_hallucination_loop.py  # Unit tests for loop detection logic
+├── .gitignore                   # Git ignore rules for Python, IDE, CDK, OS files
+├── pyproject.toml               # Modern Python packaging and tool configuration
+├── CONTRIBUTING.md              # Contribution guidelines and PR workflow
+├── CHANGELOG.md                 # Version history and release notes
 ├── LICENSE
 └── README.md
 ```
@@ -278,7 +292,28 @@ Agentic-Core-Observability/
 ```bash
 # Verify environment and connections
 python -m tests.test_connection
+
+# Run the full test suite with pytest
+pytest tests/ -v
+
+# Run only hallucination loop detection tests
+pytest tests/test_hallucination_loop.py -v
+
+# Run with coverage reporting
+pytest tests/ -v --cov=src --cov-report=term-missing
 ```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, branching strategy, and PR guidelines before submitting changes.
+
+---
+
+## 📋 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a complete version history and release notes.
 
 ---
 
