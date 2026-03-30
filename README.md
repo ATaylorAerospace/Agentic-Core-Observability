@@ -311,12 +311,6 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for th
 
 ---
 
-## 📋 Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for a complete version history and release notes.
-
----
-
 ## 📜 License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
