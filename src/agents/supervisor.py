@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import datetime
 import logging
 import uuid
 from typing import Any
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 # Hallucination-loop guard
 # ---------------------------------------------------------------------------
 MAX_ROUTING_ITERATIONS = 5
-CONFIDENCE_FLOOR = 0.85
+CONFIDENCE_FLOOR = 0.85  # TODO: Wire into run() to flag low-confidence tool responses
 
 
 def _check_hallucination_loop(trace: list[dict], threshold: int = MAX_ROUTING_ITERATIONS) -> bool:
@@ -156,6 +157,7 @@ class SupervisorAgent:
             "input_preview": user_input[:200],
             "session_id": self._session_id,
             "user_id": user_id,
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
         self._trace.append(trace_entry)
 
@@ -184,6 +186,40 @@ class SupervisorAgent:
         """Return the full execution trace for observability dashboards."""
         return list(self._trace)
 
+    def delegate_research(self, query: str) -> str:
+        """Delegate a research task to the Researcher agent.
+
+        Use this when the Supervisor classifies a request as RESEARCH
+        and wants to hand it off to the specialist Researcher agent
+        instead of handling it directly.
+        """
+        logger.info("Delegating to Researcher: %s", query[:80])
+        result = self.researcher(query)
+        self._trace.append({
+            "action": "delegate_research",
+            "input_preview": query[:200],
+            "session_id": self._session_id,
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        })
+        return str(result)
+
+    def delegate_analysis(self, query: str) -> str:
+        """Delegate an analysis task to the Analyst agent.
+
+        Use this when the Supervisor classifies a request as ANALYSIS
+        and wants to hand it off to the specialist Analyst agent
+        instead of handling it directly.
+        """
+        logger.info("Delegating to Analyst: %s", query[:80])
+        result = self.analyst(query)
+        self._trace.append({
+            "action": "delegate_analysis",
+            "input_preview": query[:200],
+            "session_id": self._session_id,
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        })
+        return str(result)
+
     # ----- internal helpers -----
 
     def _recall_preferences(self, user_id: str) -> str:
@@ -195,7 +231,11 @@ class SupervisorAgent:
             )
             return str(recall_result) if recall_result else ""
         except Exception:
-            logger.debug("No stored preferences found for user %s", user_id)
+            logger.debug(
+                "Could not recall preferences for user %s",
+                user_id,
+                exc_info=True,
+            )
             return ""
 
     @staticmethod
