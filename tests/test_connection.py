@@ -18,10 +18,11 @@ import json
 import sys
 
 import boto3
-from botocore.exceptions import ClientError, NoCredentialsError
+import pytest
+from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 
-def test_aws_credentials() -> bool:
+def check_aws_credentials() -> bool:
     """Verify that valid AWS credentials are available."""
     print("[1/5] Checking AWS credentials...")
     try:
@@ -32,12 +33,12 @@ def test_aws_credentials() -> bool:
     except NoCredentialsError:
         print("  FAIL - No AWS credentials found. Configure your environment.")
         return False
-    except ClientError as exc:
+    except (ClientError, BotoCoreError) as exc:
         print(f"  FAIL - {exc}")
         return False
 
 
-def test_bedrock_model_access(
+def check_bedrock_model_access(
     model_id: str = "us.anthropic.claude-sonnet-4-20250514",
     region: str = "us-east-1",
 ) -> bool:
@@ -59,19 +60,16 @@ def test_bedrock_model_access(
         output = body.get("content", [{}])[0].get("text", "")
         print(f"  OK  - Model responded: {output[:50]}")
         return True
-    except ClientError as exc:
+    except (ClientError, BotoCoreError, KeyError, IndexError, ValueError) as exc:
         print(f"  FAIL - {exc}")
         return False
-    except Exception as exc:
-        print(f"  FAIL - Unexpected error: {exc}")
-        return False
 
 
-def test_strands_import() -> bool:
+def check_strands_import() -> bool:
     """Verify that the Strands SDK is installed and importable."""
     print("[3/5] Importing Strands SDK...")
     try:
-        import strands  # noqa: F401
+        import strands
         from strands import Agent, tool  # noqa: F401
         from strands.models.bedrock import BedrockModel  # noqa: F401
 
@@ -83,7 +81,7 @@ def test_strands_import() -> bool:
         return False
 
 
-def test_supervisor_init() -> bool:
+def check_supervisor_init() -> bool:
     """Verify that the SupervisorAgent initializes without errors."""
     print("[4/5] Initializing SupervisorAgent...")
     try:
@@ -92,12 +90,12 @@ def test_supervisor_init() -> bool:
         agent = SupervisorAgent()
         print(f"  OK  - Session: {agent._session_id}")
         return True
-    except Exception as exc:
+    except (ImportError, RuntimeError, ValueError, TypeError, BotoCoreError, ClientError) as exc:
         print(f"  FAIL - {exc}")
         return False
 
 
-def test_tool_registration() -> bool:
+def check_tool_registration() -> bool:
     """Verify that custom tools are callable."""
     print("[5/5] Testing tool registration...")
     try:
@@ -122,9 +120,38 @@ def test_tool_registration() -> bool:
 
         print("  OK  - All 4 tools responded correctly")
         return True
-    except Exception as exc:
+    except (ImportError, AssertionError, RuntimeError, ValueError, TypeError) as exc:
         print(f"  FAIL - {exc}")
         return False
+
+
+def test_aws_credentials() -> None:
+    """Pytest wrapper for AWS credentials verification."""
+    if not check_aws_credentials():
+        pytest.skip("AWS credentials not configured in this environment.")
+
+
+def test_bedrock_model_access() -> None:
+    """Pytest wrapper for Bedrock model access verification."""
+    if not check_aws_credentials():
+        pytest.skip("AWS credentials not configured in this environment.")
+    if not check_bedrock_model_access():
+        pytest.skip("Bedrock model access unavailable in this environment.")
+
+
+def test_strands_import() -> None:
+    """Pytest wrapper for Strands SDK import verification."""
+    assert check_strands_import()
+
+
+def test_supervisor_init() -> None:
+    """Pytest wrapper for SupervisorAgent initialization verification."""
+    assert check_supervisor_init()
+
+
+def test_tool_registration() -> None:
+    """Pytest wrapper for custom tool registration verification."""
+    assert check_tool_registration()
 
 
 def main() -> None:
@@ -136,11 +163,11 @@ def main() -> None:
     print()
 
     results = {
-        "AWS Credentials": test_aws_credentials(),
-        "Bedrock Model": test_bedrock_model_access(),
-        "Strands SDK": test_strands_import(),
-        "Supervisor Init": test_supervisor_init(),
-        "Tool Registration": test_tool_registration(),
+        "AWS Credentials": check_aws_credentials(),
+        "Bedrock Model": check_bedrock_model_access(),
+        "Strands SDK": check_strands_import(),
+        "Supervisor Init": check_supervisor_init(),
+        "Tool Registration": check_tool_registration(),
     }
 
     print()

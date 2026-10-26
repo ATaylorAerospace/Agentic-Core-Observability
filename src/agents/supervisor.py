@@ -10,18 +10,19 @@ from __future__ import annotations
 
 import datetime
 import logging
+import math
 import uuid
 from typing import Any
 
-from strands import Agent, tool
+from strands import Agent
 from strands.models.bedrock import BedrockModel
 from strands_tools import http_request
 
 from src.agents.tools import (
-    research_tool,
     analysis_tool,
-    memory_store_tool,
     memory_recall_tool,
+    memory_store_tool,
+    research_tool,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Hallucination-loop guard
 # ---------------------------------------------------------------------------
 MAX_ROUTING_ITERATIONS = 5
-CONFIDENCE_FLOOR = 0.85  # TODO: Wire into run() to flag low-confidence tool responses
+CONFIDENCE_FLOOR = 0.85
 
 
 def _check_hallucination_loop(trace: list[dict], threshold: int = MAX_ROUTING_ITERATIONS) -> bool:
@@ -39,7 +40,7 @@ def _check_hallucination_loop(trace: list[dict], threshold: int = MAX_ROUTING_IT
     Detects when the same routing decision is made repeatedly without
     meaningful progress, which is a strong signal of hallucination drift.
     """
-    if len(trace) < threshold:
+    if threshold <= 0 or len(trace) < threshold:
         return False
 
     recent_actions = [entry.get("action") for entry in trace[-threshold:]]
@@ -52,6 +53,13 @@ def _check_hallucination_loop(trace: list[dict], threshold: int = MAX_ROUTING_IT
         )
         return True
     return False
+
+
+def _is_low_confidence(confidence: float, floor: float = CONFIDENCE_FLOOR) -> bool:
+    """Return True if a tool or agent confidence score falls below the configured floor."""
+    if math.isnan(confidence) or math.isnan(floor):
+        return True
+    return confidence < floor
 
 
 # ---------------------------------------------------------------------------
@@ -137,6 +145,15 @@ class SupervisorAgent:
 
     # ----- public API -----
 
+    @property
+    def session_id(self) -> str:
+        """Return the unique identifier for the current supervisor session."""
+        return self._session_id
+
+    def reset_trace(self) -> None:
+        """Clear the execution trace (e.g. after recovering from a routing loop)."""
+        self._trace.clear()
+
     def run(self, user_input: str, user_id: str = "default") -> dict[str, Any]:
         """Process a user request through the orchestration pipeline.
 
@@ -157,7 +174,7 @@ class SupervisorAgent:
             "input_preview": user_input[:200],
             "session_id": self._session_id,
             "user_id": user_id,
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
         }
         self._trace.append(trace_entry)
 
@@ -170,14 +187,14 @@ class SupervisorAgent:
                     "to avoid producing unreliable output. Please rephrase your "
                     "request or provide additional context."
                 ),
-                "trace": self._trace,
+                "trace": self.get_trace(),
                 "session_id": self._session_id,
                 "loop_detected": True,
             }
 
         return {
             "response": str(result),
-            "trace": self._trace,
+            "trace": self.get_trace(),
             "session_id": self._session_id,
             "loop_detected": False,
         }
@@ -199,7 +216,7 @@ class SupervisorAgent:
             "action": "delegate_research",
             "input_preview": query[:200],
             "session_id": self._session_id,
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
         })
         return str(result)
 
@@ -216,7 +233,7 @@ class SupervisorAgent:
             "action": "delegate_analysis",
             "input_preview": query[:200],
             "session_id": self._session_id,
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
         })
         return str(result)
 
@@ -229,6 +246,11 @@ class SupervisorAgent:
                 query=f"report preferences for user {user_id}",
                 namespace="agentic-observability",
             )
+            if isinstance(recall_result, dict):
+                results = recall_result.get("results")
+                if not results:
+                    return ""
+                return ", ".join(str(item) for item in results)
             return str(recall_result) if recall_result else ""
         except Exception:
             logger.debug(

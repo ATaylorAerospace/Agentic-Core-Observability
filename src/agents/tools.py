@@ -34,12 +34,16 @@ def research_tool(query: str, sources: str = "web,arxiv") -> dict[str, Any]:
     """
     logger.info("Research tool invoked | query='%s' sources='%s'", query, sources)
 
+    parsed_sources = [s.strip() for s in sources.split(",") if s.strip()]
+    if not parsed_sources:
+        parsed_sources = ["web", "arxiv"]
+
     # In production this delegates to the AgentCore Browser tool (Nova Act)
     # and/or the Bedrock Research Agent via the Gateway.
     # Placeholder structure for local development and testing.
     return {
         "findings": f"Research results for: {query}",
-        "sources_consulted": sources.split(","),
+        "sources_consulted": parsed_sources,
         "confidence": 0.0,
         "status": "placeholder - connect live sources via AgentCore Gateway",
     }
@@ -63,20 +67,21 @@ def analysis_tool(data: str, analysis_type: str = "summary") -> dict[str, Any]:
     logger.info("Analysis tool invoked | type='%s' data_len=%d", analysis_type, len(data))
 
     valid_types = {"summary", "trend", "comparison", "sentiment"}
-    if analysis_type not in valid_types:
+    normalized_type = analysis_type.strip().lower()
+    if normalized_type not in valid_types:
         logger.warning(
             "Invalid analysis_type '%s' received; falling back to 'summary'. "
             "Valid types: %s",
             analysis_type,
             ", ".join(sorted(valid_types)),
         )
-        analysis_type = "summary"
+        normalized_type = "summary"
 
     # In production the AgentCore Code Interpreter executes analytical
     # scripts against the supplied data.
     return {
-        "analysis": f"{analysis_type.title()} analysis of provided data",
-        "analysis_type": analysis_type,
+        "analysis": f"{normalized_type.title()} analysis of provided data",
+        "analysis_type": normalized_type,
         "data_length": len(data),
         "confidence": 0.0,
         "status": "placeholder - connect Code Interpreter via AgentCore",
@@ -105,8 +110,17 @@ def memory_store_tool(
     logger.info("Memory store | namespace='%s' content_len=%d", namespace, len(content))
 
     try:
-        meta = json.loads(metadata) if metadata else {}
+        parsed_meta = json.loads(metadata) if metadata else {}
+        if isinstance(parsed_meta, dict):
+            meta = parsed_meta
+        else:
+            logger.warning(
+                "Metadata must be a JSON object, got %s; falling back to empty dict.",
+                type(parsed_meta).__name__,
+            )
+            meta = {}
     except json.JSONDecodeError:
+        logger.warning("Invalid JSON metadata '%s'; falling back to empty dict.", metadata)
         meta = {}
 
     # In production this calls the AgentCore Memory API.
@@ -136,6 +150,10 @@ def memory_recall_tool(
         A dict with matching memory entries.
     """
     logger.info("Memory recall | namespace='%s' query='%s'", namespace, query)
+
+    if max_results < 1:
+        logger.warning("Invalid max_results=%d; falling back to 5.", max_results)
+        max_results = 5
 
     # In production this calls the AgentCore Memory API with vector similarity.
     return {
