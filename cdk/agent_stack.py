@@ -9,13 +9,20 @@
 from __future__ import annotations
 
 from aws_cdk import (
-    Duration,
     RemovalPolicy,
     Stack,
     Tags,
+)
+from aws_cdk import (
     aws_bedrock as bedrock,
+)
+from aws_cdk import (
     aws_iam as iam,
+)
+from aws_cdk import (
     aws_logs as logs,
+)
+from aws_cdk import (
     aws_s3 as s3,
 )
 from constructs import Construct
@@ -56,7 +63,10 @@ class AgenticCoreObservabilityStack(Stack):
                     "bedrock:InvokeModel",
                     "bedrock:InvokeModelWithResponseStream",
                 ],
-                resources=["arn:aws:bedrock:*::foundation-model/*"],
+                resources=[
+                    "arn:aws:bedrock:*::foundation-model/*",
+                    "arn:aws:bedrock:*:*:inference-profile/*",
+                ],
             )
         )
 
@@ -120,6 +130,12 @@ class AgenticCoreObservabilityStack(Stack):
             idle_session_ttl_in_seconds=600,
             auto_prepare=True,
         )
+
+        self.artifacts_bucket = artifacts_bucket
+        self.agent_role = agent_role
+        self.log_group = log_group
+        self.research_agent = research_agent
+        self.analyst_agent = analyst_agent
 
         # ------------------------------------------------------------------
         # Tags for AgentCore Runtime discovery
